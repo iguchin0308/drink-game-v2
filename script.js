@@ -73,10 +73,11 @@ const ICONS = {
 const el = (id) => document.getElementById(id);
 
 // ※DOM生成前に取得すると null になりやすいので、boot後に初期化する
-let screens = { deck: null, reveal: null, finished: null };
+let screens = { deck: null, draw: null, reveal: null, finished: null };
 function initScreens() {
   screens = {
     deck: el("screen-deck"),
+    draw: el("screen-draw"),        // ★追加（A案）
     reveal: el("screen-reveal"),
     finished: el("screen-finished"),
   };
@@ -93,7 +94,7 @@ function shuffle(array) {
 
 function setScreen(screenId) {
   // screens が null のままでも落ちないように
-  const list = [screens.deck, screens.reveal, screens.finished].filter(Boolean);
+  const list = [screens.deck, screens.draw, screens.reveal, screens.finished].filter(Boolean);
   for (const node of list) {
     node.classList.remove("screen-active");
     node.setAttribute("aria-hidden", "true");
@@ -115,7 +116,7 @@ let drawnCount = 0;
 // -------------------- UI --------------------
 function setTotals() {
   const total = String(CARDS.length);
-  ["total", "total2", "total3", "total4", "total5"].forEach((id) => {
+  ["total", "total2", "total3", "total4", "total5", "total_draw"].forEach((id) => {
     const node = el(id);
     if (node) node.textContent = total;
   });
@@ -124,12 +125,24 @@ function setTotals() {
 function updateCounters() {
   const remain = String(deck.length);
   const drawn = String(drawnCount);
+
+  // deck画面
   const r1 = el("remain");
-  const r2 = el("remain2");
-  const d = el("drawn");
+  const d1 = el("drawn");
   if (r1) r1.textContent = remain;
+  if (d1) d1.textContent = drawn;
+
+  // reveal画面
+  const r2 = el("remain2");
   if (r2) r2.textContent = remain;
-  if (d) d.textContent = drawn;
+
+  // draw画面（A案）
+  const rDraw = el("remain_draw");
+  const tDraw = el("total_draw");
+  const dDraw = el("drawn_draw");
+  if (rDraw) rDraw.textContent = remain;
+  if (tDraw) tDraw.textContent = String(CARDS.length);
+  if (dDraw) dDraw.textContent = drawn;
 }
 
 // ★ここ（カードとアイコンのところ）は「動かさない」指示どおり、そのまま
@@ -189,33 +202,28 @@ function drawCard() {
 }
 
 function bindEvents() {
-  // ✅「スタート」ボタンのクリックが無反応になりがちなので、複数候補で拾う
-  // HTML側のIDがどれでも動くようにしてある（存在するものだけbindされる）
-  const startCandidates = ["btn-start", "start-btn", "btn-begin", "btnStart", "start"];
-  for (const id of startCandidates) {
-    const node = el(id);
-    if (node) {
-      node.addEventListener("click", () => {
-        // ここは「開始したらデッキ画面へ」想定で newGame を呼ぶ
-        newGame();
-      });
-      break; // 最初に見つかった1つにだけbind
-    }
-  }
+  // =========================
+  // A案：画面遷移ボタン
+  // =========================
+  const btnDraw = el("btn-draw");
+  if (btnDraw) btnDraw.addEventListener("click", () => setScreen("screen-draw"));
 
-  // ✅ 次のカードへ（これは残す）
+  const btnDrawBack = el("btn-draw-back");
+  if (btnDrawBack) btnDrawBack.addEventListener("click", () => setScreen("screen-deck"));
+
+  const btnDrawSwipe = el("btn-draw-swipe");
+  if (btnDrawSwipe) btnDrawSwipe.addEventListener("click", drawCard);
+
+  // ✅ 次のカードへ → 次はまた「引く」体験に戻す
   const btnNext = el("btn-next");
-  if (btnNext) btnNext.addEventListener("click", drawCard);
+  if (btnNext) btnNext.addEventListener("click", () => setScreen("screen-draw"));
 
-  const btnReset = el("btn-reset");
+  // リスタート
   const btnRestart = el("btn-restart");
-  const btnFinishBack = el("btn-finish-back");
-
-  if (btnReset) btnReset.addEventListener("click", () => {
-    if (confirm("最初からやり直しますか？（カードはシャッフルされます）")) newGame();
-  });
-
   if (btnRestart) btnRestart.addEventListener("click", newGame);
+
+  // 互換：終了解除ボタンがある場合
+  const btnFinishBack = el("btn-finish-back");
   if (btnFinishBack) btnFinishBack.addEventListener("click", () => setScreen("screen-deck"));
 
   // =========================
@@ -292,7 +300,7 @@ function bindEvents() {
       }
     });
 
-    // keyboard（Enter/Spaceで引ける：ボタンは無いけどアクセシビリティ用）
+    // keyboard（Enter/Spaceで引ける）
     swipeTarget.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -308,17 +316,18 @@ function bindEvents() {
     try {
       initScreens();     // ✅DOM生成後にスクリーン要素を取得
       bindEvents();      // ✅イベント紐付け
-      newGame();         // ✅初期表示（ここは元の挙動を維持）
+      newGame();         // ✅初期表示
     } catch (e) {
       console.error("script.js 起動エラー:", e);
       alert("スクリプトでエラーが出ています。F12→Consoleを確認してください。");
     }
   };
 
-  // ✅DOMがまだなら待つ（defer無しでも動くように）
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", start);
   } else {
     start();
   }
 })();
+.screen { display: none; }
+.screen.screen-active { display: block; }
