@@ -1,23 +1,29 @@
 /* =========================
-   Swipe-only patch (minimal)
+   Screen switching (A案 必須)
+   ========================= */
+.screen { display: none; }
+.screen.screen-active { display: block; }
+
+/* =========================
+   Swipe-only patch (A案対応)
    ========================= */
 
-/* 1) 既存の「カードを引く」ボタンは使わないので非表示 */
+/* 1) deck画面の「カードを引く」ボタンは使わないので非表示 */
 #btn-draw,
 .draw-btn{
   display: none !important;
 }
 
-/* 2) スワイプUI（draw-screen / draw-card）を表示 */
-.draw-screen{
+/* 2) draw画面（#screen-draw）の中身を中央に */
+#screen-draw .card{
+  /* 既存のcardスタイルを活かしつつ */
   display: grid;
   gap: 14px;
   place-items: center;
-  margin-top: 6px; /* 使い方カードとの間を少し詰める */
 }
 
 /* スワイプ対象カード：ネオンガラスに寄せる */
-.draw-card{
+#screen-draw .draw-card{
   width: 100%;
   max-width: 520px;
   height: 220px;
@@ -40,10 +46,10 @@
     0 0 60px rgba(255,79,216,0.10);
 }
 
-.draw-card:active{ cursor: grabbing; }
+#screen-draw .draw-card:active{ cursor: grabbing; }
 
 /* neon gradient frame（既存cardの雰囲気に合わせる） */
-.draw-card::before{
+#screen-draw .draw-card::before{
   content:"";
   position:absolute;
   inset:-2px;
@@ -59,7 +65,7 @@
 }
 
 /* sparkle dots */
-.draw-card::after{
+#screen-draw .draw-card::after{
   content:"";
   position:absolute;
   inset:0;
@@ -72,7 +78,7 @@
 }
 
 /* 中身のテキスト */
-.draw-card-inner{
+#screen-draw .draw-card-inner{
   height: 100%;
   display: grid;
   place-items: center;
@@ -82,7 +88,7 @@
   z-index: 1;
 }
 
-.draw-badge{
+#screen-draw .draw-badge{
   display: inline-block;
   padding: 6px 10px;
   border-radius: 999px;
@@ -97,7 +103,7 @@
     0 0 18px rgba(255,79,216,0.10);
 }
 
-.draw-text{
+#screen-draw .draw-text{
   font-size: 20px;
   font-weight: 950;
   letter-spacing: .06em;
@@ -108,15 +114,20 @@
     0 0 32px rgba(123,92,255,0.55);
 }
 
-.draw-sub{
+#screen-draw .draw-sub{
   font-size: 12px;
   opacity: .78;
   margin-top: 6px;
   letter-spacing: .02em;
 }
 
-/* 3) スワイプ専用なので、もし残ってたらこのボタンも消す（保険） */
+/* 3) スワイプ専用なので、draw画面の「カードを引く」ボタンは非表示 */
 #btn-draw-swipe,
 .btn-draw{
   display: none !important;
+}
+
+/* 4) 戻るボタンは見せたい（A案の #btn-draw-back） */
+#btn-draw-back{
+  display: inline-flex;
 }
