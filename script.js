@@ -137,7 +137,7 @@ function renderIconForCard(card) {
   const box = el("card-icon");
   if (!box) return;
 
-const src = ICONS[card.category] || ICONS.default || "";
+  const src = ICONS[card.category] || ICONS.default || "";
   box.innerHTML = "";
   if (!src) return;
 
@@ -203,14 +203,13 @@ function bindEvents() {
     }
   }
 
-  const btnDraw = el("btn-draw");
+  // ✅ 次のカードへ（これは残す）
   const btnNext = el("btn-next");
+  if (btnNext) btnNext.addEventListener("click", drawCard);
+
   const btnReset = el("btn-reset");
   const btnRestart = el("btn-restart");
   const btnFinishBack = el("btn-finish-back");
-
-  if (btnDraw) btnDraw.addEventListener("click", drawCard);
-  if (btnNext) btnNext.addEventListener("click", drawCard);
 
   if (btnReset) btnReset.addEventListener("click", () => {
     if (confirm("最初からやり直しますか？（カードはシャッフルされます）")) newGame();
@@ -218,6 +217,89 @@ function bindEvents() {
 
   if (btnRestart) btnRestart.addEventListener("click", newGame);
   if (btnFinishBack) btnFinishBack.addEventListener("click", () => setScreen("screen-deck"));
+
+  // =========================
+  // Swipe only: draw-card でドロー
+  // =========================
+  const swipeTarget = el("draw-card");
+  if (swipeTarget) {
+    // スマホでスクロール誤爆しにくいように、横スワイプだけ反応
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    // 連打（連続スワイプ）で2枚引きがちなので、短いクールダウン
+    let cooldown = false;
+    const triggerDraw = () => {
+      if (cooldown) return;
+      cooldown = true;
+
+      // ちょい演出（任意）
+      try {
+        swipeTarget.animate(
+          [
+            { transform: "translateX(0px) rotate(0deg)" },
+            { transform: "translateX(120px) rotate(6deg)" },
+            { transform: "translateX(0px) rotate(0deg)" }
+          ],
+          { duration: 220, easing: "ease-out" }
+        );
+      } catch (e) {}
+
+      drawCard();
+      setTimeout(() => { cooldown = false; }, 260);
+    };
+
+    // touch
+    swipeTarget.addEventListener("touchstart", (e) => {
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+      tracking = true;
+    }, { passive: true });
+
+    swipeTarget.addEventListener("touchend", (e) => {
+      if (!tracking) return;
+      tracking = false;
+
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+
+      // 横スワイプだけ（縦スクロールは無視）
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+        triggerDraw();
+      }
+    }, { passive: true });
+
+    // mouse（PCでも動くように）
+    let mouseDown = false;
+    swipeTarget.addEventListener("mousedown", (e) => {
+      mouseDown = true;
+      startX = e.clientX;
+      startY = e.clientY;
+    });
+
+    window.addEventListener("mouseup", (e) => {
+      if (!mouseDown) return;
+      mouseDown = false;
+
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      if (Math.abs(dx) > 90 && Math.abs(dx) > Math.abs(dy)) {
+        triggerDraw();
+      }
+    });
+
+    // keyboard（Enter/Spaceで引ける：ボタンは無いけどアクセシビリティ用）
+    swipeTarget.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        triggerDraw();
+      }
+    });
+  }
 }
 
 // -------------------- Boot --------------------
