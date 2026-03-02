@@ -19,11 +19,13 @@
         <h1>つぶれちゃってもいいですか？</h1>
         <p class="sub">カードを引いて盛り上げよう（全<span id="total">--</span>枚）</p>
       </div>
-
     </header>
 
     <div class="screens" role="main" aria-label="飲みゲー本体">
 
+      <!-- =========================
+           1) デッキ画面（最初に出す）
+           ========================= -->
       <section id="screen-deck" class="screen screen-active" role="region" aria-label="カードを引く画面">
         <div class="card card-deck">
           <div class="deck-info" aria-label="デッキ情報">
@@ -33,7 +35,7 @@
 
           <button id="btn-draw" class="draw-btn" type="button">
             <span class="draw-btn__top">カードを引く</span>
-            <span class="draw-btn__bottom">タップして1枚ドロー</span>
+            <span class="draw-btn__bottom">タップしてスワイプ画面へ</span>
           </button>
 
           <p class="hint">※ お酒は無理せず、楽しく飲もう！</p>
@@ -48,9 +50,18 @@
             <li><span id="total5">--</span>枚引き切ったら終了</li>
           </ol>
         </div>
+      </section>
 
-        <!-- ===== Draw Screen（カードを引く画面）===== -->
-        <section id="draw-screen" class="draw-screen" aria-label="カードを引く画面">
+      <!-- =========================
+           2) ドロー画面（スワイプ）
+           ========================= -->
+      <section id="screen-draw" class="screen" role="region" aria-label="スワイプしてカードを引く画面">
+        <div class="card card-deck">
+          <div class="deck-info" aria-label="デッキ情報">
+            <div class="pill">残り <span id="remain_draw">--</span> / <span id="total_draw">--</span></div>
+            <div class="pill subtle">引いた枚数 <span id="drawn_draw">0</span></div>
+          </div>
+
           <div id="draw-card" class="draw-card" role="button" tabindex="0" aria-label="スワイプしてカードを引く">
             <div class="draw-card-inner">
               <div class="draw-badge">SWIPE</div>
@@ -60,16 +71,24 @@
           </div>
 
           <button id="btn-draw-swipe" class="btn-draw" type="button">カードを引く</button>
-        </section>
+
+          <div class="actions actions-one" style="margin-top: 14px;">
+            <button id="btn-draw-back" class="btn btn-ghost btn-full" type="button">戻る</button>
+          </div>
+
+          <p class="hint">※ スワイプ or ボタンで1枚ドロー</p>
+        </div>
       </section>
 
+      <!-- =========================
+           3) カード表示画面
+           ========================= -->
       <section id="screen-reveal" class="screen" role="region" aria-label="カード表示画面">
         <div class="card card-reveal">
           <div class="badge" aria-label="進行状況">
             <span id="card-index">1</span> / <span id="total3">--</span>
           </div>
 
-          <!-- ✅ classも必須（CSS効かせる） -->
           <div class="card-icon" id="card-icon" aria-hidden="true"></div>
 
           <div class="reveal-title">
@@ -92,6 +111,9 @@
         </div>
       </section>
 
+      <!-- =========================
+           4) 終了画面
+           ========================= -->
       <section id="screen-finished" class="screen" role="region" aria-label="終了画面">
         <div class="card card-finished">
           <h2>終了！</h2>
