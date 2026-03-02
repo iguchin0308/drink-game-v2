@@ -48,6 +48,19 @@
             <li><span id="total5">--</span>枚引き切ったら終了</li>
           </ol>
         </div>
+
+        <!-- ===== Draw Screen（カードを引く画面）===== -->
+        <section id="draw-screen" class="draw-screen" aria-label="カードを引く画面">
+          <div id="draw-card" class="draw-card" role="button" tabindex="0" aria-label="スワイプしてカードを引く">
+            <div class="draw-card-inner">
+              <div class="draw-badge">SWIPE</div>
+              <div class="draw-text">スワイプして引く</div>
+              <div class="draw-sub">（右 or 左 にスワイプ）</div>
+            </div>
+          </div>
+
+          <button id="btn-draw-swipe" class="btn-draw" type="button">カードを引く</button>
+        </section>
       </section>
 
       <section id="screen-reveal" class="screen" role="region" aria-label="カード表示画面">
